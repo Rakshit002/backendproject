@@ -1,11 +1,13 @@
 const mongoose=require('mongoose')
+const dbger=require('debug')("development:mongoose");
+const config=require("config")
 
 mongoose
-.connect(`mongodb://localhost//backendproject`)
+.connect(`${config.get("MONGODB_URI")}/backendproject`)
 .then(function(){
-    console.log("connected");
+    dbger("connected");
 })
 .catch(function(err){
-    console.log(err)
+    dbger(err)
 })
 module.exports=mongoose.connection;
