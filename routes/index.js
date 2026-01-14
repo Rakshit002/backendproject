@@ -2,14 +2,37 @@ const express = require("express");
 
 const router = express.Router(); 
 const isLoggedIn=require("../middlewares/isLoggedIn")
+const productModel=require("../models/prodect-model") 
+const userModel=require("../models/user")
 
 router.get("/",(req,res)=>{
     let error=req.flash("error");
-    res.render("index",{error})
+    res.render("index",{error , loggedin:false})
 })
-router.get("/shop",isLoggedIn,(req,res)=>{
-    res.render("shop")
+router.get("/shop",isLoggedIn,async (req,res)=>{
+   let products= await productModel.find();
+   let success=req.flash("success")
+    res.render("shop",{products , success})
 })
+router.get("/cart",isLoggedIn,async (req,res)=>{
+   let user = await userModel.findOne({email:req.user.email}).populate("cart");
+     const bill= (Number(user.cart[0].price)+20)-Number(discount)
+   
+    res.render("cart",{user,bill})  
+})
+router.get("/addtocart/:productid",isLoggedIn,async (req,res)=>{
+let user=await userModel.findOne({email:req.user.email})
+user.cart.push(req.params.productid);
+await user.save();
+req.flash("success","added to cart")
+res.redirect("/shop");
+
+})
+router.get("/logout",(req,res)=>{
+    
+    res.redirect("/");
+})
+
 
 
 module.exports=router
